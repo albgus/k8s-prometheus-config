@@ -13,6 +13,7 @@ scrape_configs:
     relabel_configs:
     - action: labelmap
       regex: __meta_kubernetes_node_label_(.+)
+# Below replaces the scrape target with the default cluster internal Kubernetes API endpoint, and the per-node proxy path.
     - target_label: __address__
       replacement: kubernetes.default.svc:443
     - source_labels: [__meta_kubernetes_node_name]
@@ -44,6 +45,7 @@ scrape_configs:
       target_label: __address__
     - action: labelmap
       regex: __meta_kubernetes_pod_label_(.+)
+# Add meta labels for namespace and pod name as actual labels.
     - source_labels: [__meta_kubernetes_namespace]
       action: replace
       target_label: kubernetes_namespace
@@ -73,7 +75,7 @@ scrape_configs:
       replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
 
 # Query kube-state-metrics - required the kube-state-metrics Pod to be deployed.
-# This may be completely redundant if the Pod is configured properly as it should be picked up by kubernetes-pdos.
+# This may be completely redundant if the Pod is configured with proper annotations as it should be picked up by kubernetes-pods.
   - job_name: 'kube-state-metrics'
     static_configs:
     - targets: ['kube-state-metrics:8080']
